@@ -36,7 +36,7 @@ public class AbstractProcessor {
 	
 	public void process(String input) {
 		String lowerCaseInput = input.toLowerCase().trim();
-		String withoutNewlineInput = lowerCaseInput.replaceAll(System.lineSeparator(), "");
+		String withoutNewlineInput = lowerCaseInput.replaceAll("\\\\n", "");
 		this.filter(withoutNewlineInput);
 	}
 	
@@ -47,8 +47,8 @@ public class AbstractProcessor {
 
 		StringTokenizer tokenizer = new StringTokenizer(abstractContent);
 		while (tokenizer.hasMoreTokens()) {
-			String token = tokenizer.nextToken();
-			if (this.stopwords.contains(token)) {
+			String token = tokenizer.nextToken().replaceAll("[^a-z]", "");
+			if (!token.isEmpty() && !this.stopwords.contains(token)) {
 				this.mapStemmedWord(this.abstractTitle.toString(), token);
 			}
 		}
