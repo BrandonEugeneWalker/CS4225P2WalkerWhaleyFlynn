@@ -118,9 +118,8 @@ public class PorterStemmer {
     }
 
     /* cons(i) is true <=> b[i] is a consonant. */
-    private final boolean cons(int i)
-    {  
-    	switch (b[i]) {  
+    private final boolean cons(int i) {  
+    	switch (this.b[i]) {  
     		case 'a': 
     		case 'e': 
     		case 'i': 
@@ -129,48 +128,60 @@ public class PorterStemmer {
     			return false;
     		case 'y': 
     			return (i==0) ? true : !cons(i-1);
-    		default: return true;
+    		default: 
+    			return true;
     	}
     }
 
-   /* m() measures the number of consonant sequences between 0 and j. if c is
-      a consonant sequence and v a vowel sequence, and <..> indicates arbitrary
-      presence,
+    /* m() measures the number of consonant sequences between 0 and j. if c is
+       a consonant sequence and v a vowel sequence, and <..> indicates arbitrary
+       presence,
 
          <c><v>       gives 0
          <c>vc<v>     gives 1
          <c>vcvc<v>   gives 2
          <c>vcvcvc<v> gives 3
          ....
-   */
-
-   private final int m()
-   {  int n = 0;
-      int i = 0;
-      while(true)
-      {  if (i > j) return n;
-         if (! cons(i)) break; i++;
-      }
-      i++;
-      while(true)
-      {  while(true)
-         {  if (i > j) return n;
-               if (cons(i)) break;
-               i++;
-         }
-         i++;
-         n++;
-         while(true)
-         {  if (i > j) return n;
-            if (! cons(i)) break;
-            i++;
-         }
-         i++;
-       }
-   }
+    */
+    private final int m() {  
+    	int n = 0;
+    	int i = 0;
+    	while (true) {  
+    		if (i > this.j) {
+    			return n;
+    		}
+    		if (! cons(i)) {
+    			break;
+    		} 
+    		i++;
+    	}
+    	i++;
+    	while (true) {  
+    		while (true) {  
+    			if (i > this.j) {
+    				return n;
+    			}
+    			if (cons(i)) {
+    				break;
+    			}
+    			i++;
+    		}
+    		i++;
+    		n++;
+    		while (true) {  
+    			if (i > this.j) {
+    				return n;
+    			}
+    			if (! cons(i)) {
+    				break;
+    			}
+    			i++;
+    		}
+    		i++;
+    	}
+    }
 
    /* vowelinstem() is true <=> 0,...j contains a vowel */
-
    private final boolean vowelinstem()
    {  int i; for (i = 0; i <= j; i++) if (! cons(i)) return true;
       return false;

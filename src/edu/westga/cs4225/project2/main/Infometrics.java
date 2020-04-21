@@ -1,9 +1,14 @@
 package edu.westga.cs4225.project2.main;
-import java.io.IOException;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
+import org.apache.commons.net.util.Base64;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -13,7 +18,9 @@ import org.apache.hadoop.mapreduce.lib.input.NLineInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 
-import edu.westga.cs4225.project2.input.MyInputFormatNLines;
+import edu.westga.cs4225.project2.datatypes.ArrayListWritable;
+import edu.westga.cs4225.project2.processing.AbstractProcessor;
+import edu.westga.cs4225.project2.processing.FileStopwordCollector;
 
 /**
  * This class contains the Mapper and Reducer classes as well
@@ -32,15 +39,24 @@ public class Infometrics {
 	 *
 	 */
 	public static class MyMapper extends
-			Mapper<Object, Text, Text, IntWritable> {
-		
-		private static final IntWritable ONE = new IntWritable(1);
-		private Text word = new Text();
+			Mapper<Object, Text, Text, ArrayListWritable<Text>> {
 		
 		@Override
 		public void map(Object key, Text value, Context context)
 				throws IOException, InterruptedException {
-			
+			String serializedCollector = context.getConfiguration().get("COLLECTOR");
+			ObjectInputStream objectinput = new ObjectInputStream(new ByteArrayInputStream(Base64.decodeBase64(serializedCollector)));
+			try {
+				FileStopwordCollector collector = (FileStopwordCollector) objectinput.readObject();
+				AbstractProcessor processor = new AbstractProcessor(collector);
+				processor.process(value.toString());
+				context.write(processor.getKey(), processor.getValue());
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new IOException();
+			} finally {
+				objectinput.close();
+			}
 		}
 	}
 
@@ -52,14 +68,14 @@ public class Infometrics {
 	 *
 	 */
 	public static class MyReducer extends
-			Reducer<Text, IntWritable, Text, IntWritable> {
-		
-		private IntWritable result = new IntWritable();
+			Reducer<Text, ArrayListWritable<Text>, Text, ArrayListWritable<Text>> {
 		
 		@Override
-		public void reduce(Text key, Iterable<IntWritable> values,
+		public void reduce(Text key, Iterable<ArrayListWritable<Text>> values,
 				Context context) throws IOException, InterruptedException {
-			
+			for (ArrayListWritable<Text> writables : values) {
+				context.write(key, writables);
+			}
 		}
 	}
 	
@@ -71,13 +87,23 @@ public class Infometrics {
 	 * @throws Exception if any errors occur.
 	 */
 	public static void main(String[] args) throws Exception {
-		if (args.length != 2) {
-			System.err.println("Usage: Infometrics <in> <out>");
+		if (args.length != 3) {
+			System.err.println("Usage: Infometrics <in> <out> <stopword-file>");
 			ToolRunner.printGenericCommandUsage(System.err);
 			System.exit(2);
 		}
 
+		FileStopwordCollector collector = new FileStopwordCollector(args[2]);
+		ByteArrayOutputStream byteoutput = new ByteArrayOutputStream();
+		ObjectOutputStream objectoutput = new ObjectOutputStream(byteoutput);
+		
+		objectoutput.writeObject(collector);
+		objectoutput.close();
+		String serializedCollector = new String(Base64.encodeBase64(byteoutput.toByteArray()));
+		
 		Configuration conf = new Configuration();
+		conf.set("COLLECTOR", serializedCollector);
+		
 		Job job = Job.getInstance(conf, "Infometrics");
 		NLineInputFormat.setNumLinesPerSplit(job, 0);
 		
@@ -86,9 +112,8 @@ public class Infometrics {
 		job.setCombinerClass(MyReducer.class);
 		job.setReducerClass(MyReducer.class);
 
-		job.setInputFormatClass(MyInputFormatNLines.class);
 		job.setOutputKeyClass(Text.class);
-		job.setOutputValueClass(IntWritable.class);
+		job.setOutputValueClass(ArrayListWritable.class);
 
 		FileInputFormat.addInputPath(job, new Path(args[0]));
 		FileOutputFormat.setOutputPath(job, new Path(args[1] + System.currentTimeMillis()));
