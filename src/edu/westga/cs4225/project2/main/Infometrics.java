@@ -81,7 +81,7 @@ public class Infometrics {
 	
 	/**
 	 * Starting point for the application. Takes 3 arguments. 
-	 * Arguments = Input Directory, Output Directory, K-Count.
+	 * Arguments = Input Directory, Output Directory, Stopword file path.
 	 * 
 	 * @param args the program arguments.
 	 * @throws Exception if any errors occur.
