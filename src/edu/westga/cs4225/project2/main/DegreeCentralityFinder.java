@@ -1,8 +1,11 @@
 package edu.westga.cs4225.project2.main;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -27,6 +30,8 @@ import edu.westga.cs4225.project2.datatypes.ArrayListWritable;
  */
 public class DegreeCentralityFinder {
 	private static ConcurrentHashMap<Text, ArrayListWritable<Text>> abstractWordMap = new ConcurrentHashMap<Text, ArrayListWritable<Text>>();
+	private static volatile int REDUCE_COUNT = 0;
+	private static volatile int MAP_COUNT = 0;
 
 	/**
 	 * Maps each abstract with each other.
@@ -46,31 +51,31 @@ public class DegreeCentralityFinder {
 		@Override
 		public void map(Object key, Text value, Context context)
 				throws IOException, InterruptedException {
-			//try {
-				String line = value.toString();
-				String replacedCommad = line.replace(",", "");
-				String replaceLeftBracket = replacedCommad.replace("[", "");
-				String replaceRightBracket = replaceLeftBracket
-						.replace("]", "");
-				String replaceTab = replaceRightBracket.replace("\t", " ");
-				String[] splitLine = replaceTab.split(" ");
-				String currentAbstract = splitLine[0];
+			// if (MAP_COUNT % 1000 == 0) {
+			// System.out.println("Map count: " + MAP_COUNT);
+			// }
 
-				Text abstractText = new Text(currentAbstract);
-				ArrayListWritable<Text> words = new ArrayListWritable<Text>();
-				// Text tokenText = new Text();
+			String line = value.toString();
+			String replacedCommad = line.replace(",", "");
+			String replaceLeftBracket = replacedCommad.replace("[", "");
+			String replaceRightBracket = replaceLeftBracket.replace("]", "");
+			String replaceTab = replaceRightBracket.replace("\t", " ");
+			String[] splitLine = replaceTab.split(" ");
+			String currentAbstract = splitLine[0];
 
-				for (int i = 1; i < splitLine.length; i++) {
-					String currentToken = splitLine[i];
-					// tokenText.set(currentToken);
-					words.add(new Text(currentToken));
-				}
-				abstractWordMap.put(abstractText, words);
-				context.write(abstractText, words);
-			//} catch (Exception e) {
-			//	System.err.println(e.getMessage());
-			//	e.printStackTrace();
-			//}
+			Text abstractText = new Text(currentAbstract);
+			ArrayListWritable<Text> words = new ArrayListWritable<Text>();
+			// Text tokenText = new Text();
+
+			for (int i = 1; i < splitLine.length; i++) {
+				String currentToken = splitLine[i];
+				// tokenText.set(currentToken);
+				words.add(new Text(currentToken));
+			}
+			abstractWordMap.put(abstractText, words);
+			context.write(abstractText, words);
+
+			// MAP_COUNT++;
 
 		}
 	}
@@ -95,6 +100,10 @@ public class DegreeCentralityFinder {
 		@Override
 		public void reduce(Text key, Iterable<ArrayListWritable<Text>> values,
 				Context context) throws IOException, InterruptedException {
+			// if (REDUCE_COUNT % 100 == 0) {
+			// System.out.println("Reduce count: " + REDUCE_COUNT);
+			// }
+
 			ArrayListWritable<Text> commonAbstracts = new ArrayListWritable<Text>();
 			ArrayListWritable<Text> currentTokens = abstractWordMap.get(key);
 			Set<Text> abstractKeySet = abstractWordMap.keySet();
@@ -111,15 +120,18 @@ public class DegreeCentralityFinder {
 			}
 			context.write(key, commonAbstracts);
 
+			// REDUCE_COUNT++;
 		}
 
 		private boolean collectionContainsAny(
 				ArrayListWritable<Text> firstCollection,
 				ArrayListWritable<Text> secondCollection) {
+
 			boolean containsAny = false;
 			for (Text currentKey : firstCollection) {
 				if (secondCollection.contains(currentKey)) {
 					containsAny = true;
+					return true;
 				}
 			}
 			return containsAny;
@@ -190,6 +202,14 @@ public class DegreeCentralityFinder {
 		}
 	}
 
+	/**
+	 * The entry point to the application.
+	 * 
+	 * @param args
+	 *            the command line arguments
+	 * @throws Exception
+	 *             if anything bad happens
+	 */
 	public static void main(String[] args) throws Exception {
 		Configuration conf = new Configuration();
 		String[] otherArgs = new GenericOptionsParser(conf, args)
@@ -216,26 +236,36 @@ public class DegreeCentralityFinder {
 		FileInputFormat.addInputPath(job1, new Path(args[0]));
 		FileOutputFormat.setOutputPath(job1, new Path(outputFileName1));
 
-		boolean results = job1.waitForCompletion(true);
+		boolean results = false;
 
-		if (job1.isSuccessful() == false) {
-			throw new Exception("Job failed.");
+		try {
+			results = job1.waitForCompletion(true);
+		} catch (Exception e) {
+			System.err.println(e.getMessage());
+			e.printStackTrace();
 		}
 
-		// Job job2 = new Job(conf, "degree centrality finder second half");
-		// job2.setJarByClass(DegreeCentralityFinder.class);
-		// job2.setMapperClass(CentralitySecondaryMapper.class);
-		// job2.setCombinerClass(CentralitySecondaryReducer.class);
-		// job2.setReducerClass(CentralitySecondaryReducer.class);
-		// job2.setOutputKeyClass(Text.class);
-		// job2.setOutputValueClass(IntWritable.class);
-		//
-		// FileInputFormat.addInputPath(job2, new Path(outputFileName1));
-		// FileOutputFormat.setOutputPath(job2, new Path(outputFileName2));
-		//
-		// boolean results2 = job2.waitForCompletion(true);
-		//
-		// System.exit((results && results2) ? 0 : 1);
+		Job job2 = new Job(conf, "degree centrality finder second half");
+		job2.setJarByClass(DegreeCentralityFinder.class);
+		job2.setMapperClass(CentralitySecondaryMapper.class);
+		job2.setCombinerClass(CentralitySecondaryReducer.class);
+		job2.setReducerClass(CentralitySecondaryReducer.class);
+		job2.setOutputKeyClass(Text.class);
+		job2.setOutputValueClass(IntWritable.class);
+
+		FileInputFormat.addInputPath(job2, new Path(outputFileName1));
+		FileOutputFormat.setOutputPath(job2, new Path(outputFileName2));
+
+		boolean results2 = false;
+
+		try {
+			results2 = job2.waitForCompletion(true);
+		} catch (Exception e) {
+			System.err.println(e.getMessage());
+			e.printStackTrace();
+		}
+
+		System.exit((results && results2) ? 0 : 1);
 
 	}
 
