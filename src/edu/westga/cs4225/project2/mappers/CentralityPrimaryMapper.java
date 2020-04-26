@@ -15,8 +15,7 @@ import edu.westga.cs4225.project2.processing.SimilarityPreprocessor;
  * @author Brandon Walker, Luke Whaley, Kevin Flynn
  *
  */
-public class CentralityPrimaryMapper extends
-		Mapper<Object, Text, Text, ArrayListWritable<Text>> {
+public class CentralityPrimaryMapper extends Mapper<Object, Text, Text, ArrayListWritable<Text>> {
 
 	/**
 	 * Maps each abstract with the list of its words.
@@ -25,8 +24,7 @@ public class CentralityPrimaryMapper extends
 	 * @postcondition the input data was mapped
 	 */
 	@Override
-	public void map(Object key, Text value, Context context)
-			throws IOException, InterruptedException {
+	public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
 
 		SimilarityPreprocessor processor = new SimilarityPreprocessor();
 		String[] contents = processor.getContents(value.toString());

@@ -14,21 +14,19 @@ import org.apache.hadoop.mapreduce.Mapper.Context;
  * @author Brandon Walker, Luke Whaley, Kevin Flynn
  *
  */
-public class CentralitySecondaryMapper extends
-		Mapper<Object, Text, Text, IntWritable> {
+public class CentralitySecondaryMapper extends Mapper<Object, Text, Text, IntWritable> {
 
 	private final static IntWritable ONE = new IntWritable(1);
 
 	/**
-	 * Using the results from the first job, it maps each number of another
-	 * abstract attached to the key abstract.
+	 * Using the results from the first job, it maps each number of another abstract
+	 * attached to the key abstract.
 	 * 
 	 * @precondition none
 	 * @postcondition the input is mapped
 	 */
 	@Override
-	public void map(Object key, Text value, Context context)
-			throws IOException, InterruptedException {
+	public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
 		String line = value.toString();
 		String replacedCommad = line.replace(",", "");
 		String replaceLeftBracket = replacedCommad.replace("[", "");
@@ -39,7 +37,7 @@ public class CentralitySecondaryMapper extends
 		Text keyAbstractText = new Text(keyAbstract);
 
 		for (int i = 1; i < splitLine.length; i++) {
-			context.write(keyAbstractText, ONE);
+			context.write(keyAbstractText, this.ONE);
 		}
 	}
 }

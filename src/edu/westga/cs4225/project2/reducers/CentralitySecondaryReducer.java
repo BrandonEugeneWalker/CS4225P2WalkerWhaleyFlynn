@@ -7,15 +7,14 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.Reducer.Context;
 
-
 /**
- * Reduces the mapping of CentralitySecondaryMapper into the final desired results for part 4.
+ * Reduces the mapping of CentralitySecondaryMapper into the final desired
+ * results for part 4.
  * 
  * @author Brandon Walker, Luke Whaley, Kevin Flynn
  *
  */
-public class CentralitySecondaryReducer extends
-		Reducer<Text, IntWritable, Text, IntWritable> {
+public class CentralitySecondaryReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
 
 	private IntWritable result = new IntWritable();
 

@@ -14,19 +14,18 @@ import edu.westga.cs4225.project2.datatypes.ArrayListWritable;
  * @author Brandon Walker, Luke Whaley, Kevin Flynn
  *
  */
-public class CentralityPrimaryReducer extends
-		Reducer<Text, ArrayListWritable<Text>, Text, ArrayListWritable<Text>> {
+public class CentralityPrimaryReducer extends Reducer<Text, ArrayListWritable<Text>, Text, ArrayListWritable<Text>> {
 
 	/**
-	 * Reduces the given input, outputting the abstract, and a list of each
-	 * abstract that it shares words with.
+	 * Reduces the given input, outputting the abstract, and a list of each abstract
+	 * that it shares words with.
 	 * 
 	 * @precondition none
 	 * @postcondition the input is reduced
 	 */
 	@Override
-	public void reduce(Text key, Iterable<ArrayListWritable<Text>> values,
-			Context context) throws IOException, InterruptedException {
+	public void reduce(Text key, Iterable<ArrayListWritable<Text>> values, Context context)
+			throws IOException, InterruptedException {
 		ArrayListWritable<Text> group = new ArrayListWritable<Text>();
 		for (ArrayListWritable<Text> value : values) {
 			for (Text currentText : value) {
