@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.io.WritableComparable;
 
 /**
  * Writable extension of a Java ArrayList. Elements in the list must be homogeneous and must
@@ -29,7 +30,7 @@ import org.apache.hadoop.io.Writable;
  *
  * @param <E> type of list element
  */
-public class ArrayListWritable<E extends Writable> extends ArrayList<E> implements Writable {
+public class ArrayListWritable<E extends Writable> extends ArrayList<E> implements Writable, WritableComparable<ArrayListWritable<E>> {
   private static final long serialVersionUID = 4911321393319821791L;
 
   /**
@@ -112,6 +113,27 @@ public class ArrayListWritable<E extends Writable> extends ArrayList<E> implemen
 
     return sb.toString();
   }
+
+  @Override
+  public int compareTo(ArrayListWritable<E> o) {
+	if (this.size() > o.size()) {
+		return 1;
+	}
+	if (this.size() < o.size()) {
+		return -1;
+	}
+	
+	boolean containsSameElements = true;
+	for (E element : this) {
+		if (!o.contains(element)) {
+			containsSameElements = false;
+			break;
+		}
+	}
+	
+	return containsSameElements ? 0 : -1;
+  }
+
 }
 
 

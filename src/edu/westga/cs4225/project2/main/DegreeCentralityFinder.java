@@ -1,11 +1,6 @@
 package edu.westga.cs4225.project2.main;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -14,13 +9,12 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.hadoop.mapreduce.Mapper.Context;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.util.GenericOptionsParser;
-import org.apache.hadoop.util.ToolRunner;
 
 import edu.westga.cs4225.project2.datatypes.ArrayListWritable;
+import edu.westga.cs4225.project2.processing.SimilarityPreprocessor;
+import edu.westga.cs4225.project2.main.similarity.WordStep;
 
 /**
  * Determines the DegreeCentrality of each abstract.
@@ -29,9 +23,6 @@ import edu.westga.cs4225.project2.datatypes.ArrayListWritable;
  *
  */
 public class DegreeCentralityFinder {
-	private static ConcurrentHashMap<Text, ArrayListWritable<Text>> abstractWordMap = new ConcurrentHashMap<Text, ArrayListWritable<Text>>();
-	private static volatile int REDUCE_COUNT = 0;
-	private static volatile int MAP_COUNT = 0;
 
 	/**
 	 * Maps each abstract with each other.
@@ -39,8 +30,7 @@ public class DegreeCentralityFinder {
 	 * @author Brandon Walker, Luke Whaley, Kevin Flynn
 	 *
 	 */
-	public static class CentralityPrimaryMapper extends
-			Mapper<Object, Text, Text, ArrayListWritable<Text>> {
+	public static class CentralityPrimaryMapper extends Mapper<Object, Text, Text, ArrayListWritable<Text>> {
 
 		/**
 		 * Maps each abstract with the list of its words.
@@ -49,34 +39,26 @@ public class DegreeCentralityFinder {
 		 * @postcondition the input data was mapped
 		 */
 		@Override
-		public void map(Object key, Text value, Context context)
-				throws IOException, InterruptedException {
-			// if (MAP_COUNT % 1000 == 0) {
-			// System.out.println("Map count: " + MAP_COUNT);
-			// }
-
-			String line = value.toString();
-			String replacedCommad = line.replace(",", "");
-			String replaceLeftBracket = replacedCommad.replace("[", "");
-			String replaceRightBracket = replaceLeftBracket.replace("]", "");
-			String replaceTab = replaceRightBracket.replace("\t", " ");
-			String[] splitLine = replaceTab.split(" ");
-			String currentAbstract = splitLine[0];
-
-			Text abstractText = new Text(currentAbstract);
-			ArrayListWritable<Text> words = new ArrayListWritable<Text>();
-			// Text tokenText = new Text();
-
-			for (int i = 1; i < splitLine.length; i++) {
-				String currentToken = splitLine[i];
-				// tokenText.set(currentToken);
-				words.add(new Text(currentToken));
+		public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
+			try {
+				SimilarityPreprocessor processor = new SimilarityPreprocessor();
+				String[] contents = processor.getContents(value.toString());
+				if (contents.length > 1) {
+					for (int i = 1; i < contents.length - 1; i++) {
+						Text currentI = new Text(contents[i]);
+						ArrayListWritable<Text> group = new ArrayListWritable<Text>();
+						for (int j = 1; j < contents.length; j++) {
+							Text currentJ = new Text(contents[j]);
+							if (i != j && !group.contains(currentJ)) {
+								group.add(currentJ);
+							}
+						}
+						context.write(currentI, group);
+					}
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-			abstractWordMap.put(abstractText, words);
-			context.write(abstractText, words);
-
-			// MAP_COUNT++;
-
 		}
 	}
 
@@ -86,9 +68,7 @@ public class DegreeCentralityFinder {
 	 * @author Brandon Walker, Luke Whaley, Kevin Flynn
 	 *
 	 */
-	public static class CentralityPrimaryReducer
-			extends
-			Reducer<Text, ArrayListWritable<Text>, Text, ArrayListWritable<Text>> {
+	public static class CentralityPrimaryReducer extends Reducer<Text, ArrayListWritable<Text>, Text, ArrayListWritable<Text>> {
 
 		/**
 		 * Reduces the given input, outputting the abstract, and a list of each
@@ -98,44 +78,18 @@ public class DegreeCentralityFinder {
 		 * @postcondition the input is reduced
 		 */
 		@Override
-		public void reduce(Text key, Iterable<ArrayListWritable<Text>> values,
-				Context context) throws IOException, InterruptedException {
-			// if (REDUCE_COUNT % 100 == 0) {
-			// System.out.println("Reduce count: " + REDUCE_COUNT);
-			// }
-
-			ArrayListWritable<Text> commonAbstracts = new ArrayListWritable<Text>();
-			ArrayListWritable<Text> currentTokens = abstractWordMap.get(key);
-			Set<Text> abstractKeySet = abstractWordMap.keySet();
-
-			for (Text currentKey : abstractKeySet) {
-				ArrayListWritable<Text> currentCollection = abstractWordMap
-						.get(currentKey);
-				if (currentKey.equals(key)) {
-					continue;
-				} else if (this.collectionContainsAny(currentTokens,
-						currentCollection)) {
-					commonAbstracts.add(currentKey);
+		public void reduce(Text key, Iterable<ArrayListWritable<Text>> values, Context context) throws IOException, InterruptedException {
+			ArrayListWritable<Text> group = new ArrayListWritable<Text>();
+			for (ArrayListWritable<Text> value : values) {
+				for (Text currentText : value) {
+					if (!group.contains(currentText)) {
+						group.add(currentText);
+					}
 				}
 			}
-			context.write(key, commonAbstracts);
-
-			// REDUCE_COUNT++;
+			context.write(key, group);
 		}
 
-		private boolean collectionContainsAny(
-				ArrayListWritable<Text> firstCollection,
-				ArrayListWritable<Text> secondCollection) {
-
-			boolean containsAny = false;
-			for (Text currentKey : firstCollection) {
-				if (secondCollection.contains(currentKey)) {
-					containsAny = true;
-					return true;
-				}
-			}
-			return containsAny;
-		}
 	}
 
 	/**
@@ -212,52 +166,64 @@ public class DegreeCentralityFinder {
 	 */
 	public static void main(String[] args) throws Exception {
 		Configuration conf = new Configuration();
-		String[] otherArgs = new GenericOptionsParser(conf, args)
-				.getRemainingArgs();
-
 		if (args.length != 2) {
 			System.err.println("Usage: DegreeCentralityFinder <in> <out>");
 			System.exit(2);
 		}
 
-		Job job1 = new Job(conf, "degree centrality finder first half");
+		String outputFileName0 = args[1] + "/part0";
+		String outputFileName1 = args[1] + "/part1";
+		String outputFileName2 = args[1] + "/part2";
+		
+		Job job0 = Job.getInstance(conf, "degree centrality finder word mapping");
+		job0.setJarByClass(DegreeCentralityFinder.class);
+		job0.setMapperClass(WordStep.WordStepMapper.class);
+		job0.setCombinerClass(WordStep.WordStepReducer.class);
+		job0.setReducerClass(WordStep.WordStepReducer.class);
+		job0.setMapOutputKeyClass(Text.class);
+		job0.setMapOutputValueClass(ArrayListWritable.class);
+		job0.setOutputKeyClass(Text.class);
+		job0.setOutputKeyClass(ArrayListWritable.class);
+		FileInputFormat.addInputPath(job0, new Path(args[0]));
+		FileOutputFormat.setOutputPath(job0, new Path(outputFileName0));
+		
+		boolean results0 = false;
+		try {
+			results0 = job0.waitForCompletion(true);
+		} catch (Exception e) {
+			System.err.println(e.getMessage());
+			e.printStackTrace();
+		}
+		
+		Job job1 = Job.getInstance(conf, "degree centrality finder first half");
 		job1.setJarByClass(DegreeCentralityFinder.class);
 		job1.setMapperClass(CentralityPrimaryMapper.class);
 		job1.setCombinerClass(CentralityPrimaryReducer.class);
 		job1.setReducerClass(CentralityPrimaryReducer.class);
 		job1.setOutputKeyClass(Text.class);
 		job1.setOutputValueClass(ArrayListWritable.class);
-
-		String outputFileName1 = args[1] + "/part1/"
-				+ System.currentTimeMillis();
-		String outputFileName2 = args[1] + "/part2/"
-				+ System.currentTimeMillis();
-
-		FileInputFormat.addInputPath(job1, new Path(args[0]));
+		FileInputFormat.addInputPath(job1, new Path(outputFileName0));
 		FileOutputFormat.setOutputPath(job1, new Path(outputFileName1));
 
-		boolean results = false;
-
+		boolean results1 = false;
 		try {
-			results = job1.waitForCompletion(true);
+			results1 = job1.waitForCompletion(true);
 		} catch (Exception e) {
 			System.err.println(e.getMessage());
 			e.printStackTrace();
 		}
 
-		Job job2 = new Job(conf, "degree centrality finder second half");
+		Job job2 = Job.getInstance(conf, "degree centrality finder second half");
 		job2.setJarByClass(DegreeCentralityFinder.class);
 		job2.setMapperClass(CentralitySecondaryMapper.class);
 		job2.setCombinerClass(CentralitySecondaryReducer.class);
 		job2.setReducerClass(CentralitySecondaryReducer.class);
 		job2.setOutputKeyClass(Text.class);
 		job2.setOutputValueClass(IntWritable.class);
-
 		FileInputFormat.addInputPath(job2, new Path(outputFileName1));
 		FileOutputFormat.setOutputPath(job2, new Path(outputFileName2));
 
 		boolean results2 = false;
-
 		try {
 			results2 = job2.waitForCompletion(true);
 		} catch (Exception e) {
@@ -265,7 +231,7 @@ public class DegreeCentralityFinder {
 			e.printStackTrace();
 		}
 
-		System.exit((results && results2) ? 0 : 1);
+		System.exit((results0 && results1 && results2) ? 0 : 1);
 
 	}
 

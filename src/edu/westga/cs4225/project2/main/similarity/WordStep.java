@@ -37,12 +37,15 @@ public class WordStep {
 	 *
 	 */
 	public static class WordStepReducer extends Reducer<Text, ArrayListWritable<Text>, Text, ArrayListWritable<Text>> {
-
 		@Override
 		public void reduce(Text key, Iterable<ArrayListWritable<Text>> values, Context context) throws IOException, InterruptedException {
 			ArrayListWritable<Text> writable = new ArrayListWritable<Text>();
 			for (ArrayListWritable<Text> current : values) {
-				writable.addAll(current);
+				for (Text currentText : current) {
+					if (!writable.contains(currentText)) {
+						writable.add(currentText);
+					}
+				}
 			}
 			context.write(key, writable);
 		}
