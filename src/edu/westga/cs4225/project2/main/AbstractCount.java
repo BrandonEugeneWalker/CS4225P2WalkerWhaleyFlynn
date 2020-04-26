@@ -109,8 +109,8 @@ public class AbstractCount {
 	 * @throws Exception if any errors occur.
 	 */
 	public static void main(String[] args) throws Exception {
-		if (args.length != 3) {
-			System.err.println("Usage: Infometrics <in> <out> ");
+		if (args.length != 2) {
+			System.err.println("Usage: Infometrics <in> <out>");
 			//ToolRunner.printGenericCommandUsage(System.err);
 			//System.exit(2);
 		}
