@@ -7,7 +7,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.ArrayList;
 import java.util.Scanner;
 
 import org.apache.commons.net.util.Base64;
@@ -15,25 +14,23 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.hadoop.mapreduce.Reducer.Context;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.NLineInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.util.ToolRunner;
 
-import edu.westga.cs4225.project2.datatypes.ArrayListWritable;
-import edu.westga.cs4225.project2.main.Infometrics.MyMapper;
-import edu.westga.cs4225.project2.main.Infometrics.MyReducer;
-import edu.westga.cs4225.project2.processing.AbstractProcessor;
+import edu.westga.cs4225.project2.main.StandardizeScore.MyStandardizeMapper;
+import edu.westga.cs4225.project2.main.StandardizeScore.MyStandardizeReducer;
 import edu.westga.cs4225.project2.processing.FileStopwordCollector;
 
+/**
+ * 
+ * @author Kevin Flynn
+ *
+ */
 public class AbstractCount {
-	private static Path CollectionSizePath = null;
-	private static int COLLECTION_SIZE = 0;
 
 	/**
 	 * This is the mapper class that maps all of the data.
@@ -81,70 +78,19 @@ public class AbstractCount {
 		}
 	}
 	
-	/**
-	 * This is the mapper class that maps all of the data.
-	 * The map method counts all of the kmers in the line.
-	 * 
-	 * @author Kevin Flynn
-	 *
-	 */
-	public static class MyStandardizeMapper extends
-			Mapper<Object, Text, Text, IntWritable> {
-		
-		private static IntWritable ONE = new IntWritable();
-		private Text KEY = new Text();
 
-		@Override
-		public void map(Object key, Text value, Context context)
-				throws IOException, InterruptedException {
-			try {
-				String[] info = value.toString().split("\t");
-				double val = (Double.parseDouble(info[1])/ COLLECTION_SIZE ) * 10000;
-				ONE.set((int) val);
-				Text newKey = new Text(info[0]);
-				context.write(newKey, ONE);	
-				
-			} catch (Exception e) {
-				
-				System.out.print(value);
-			}
 	
-		}
-	}
-
-	/**
-	 * This is the reducer class.
-	 * It counts all of occurrences of the given kmer.
-	 * 
-	 * @author Kevin Flynn
-	 *
-	 */
-	public static class MyStandardizeReducer extends
-			Reducer<Text, IntWritable, Text, IntWritable> {
-		
-		@Override
-		public void reduce(Text key, Iterable<IntWritable> values,
-				Context context) throws IOException, InterruptedException {
-				for(IntWritable writable : values){
-					context.write(key, writable);	
-				}
-			
-			
-
-		}
-	}
-	
-	private static void readLine(){
-		File file = new File(CollectionSizePath.toString()+ "/part-r-00000");
+	private static void readCollectionSize(Path collectionSizePath){
+		File file = new File(collectionSizePath.toString()+ "/part-r-00000");
 		try {
 		      Scanner myReader = new Scanner(file);
 		      while (myReader.hasNextLine()) {
 		        String data = myReader.nextLine();
 		        String[] allInput = data.split("\t");
-		        if(allInput.length == 2){
+		        if (allInput.length == 2){
 			        System.out.println(allInput);
 			        int value = Integer.parseInt(allInput[1]);
-			        COLLECTION_SIZE = value;
+			        AbstractSize.COLLECTION_SIZE = value;
 		        }
 
 		      }
@@ -170,8 +116,8 @@ public class AbstractCount {
 			//ToolRunner.printGenericCommandUsage(System.err);
 			//System.exit(2);
 		}
-
-		FileStopwordCollector collector = new FileStopwordCollector("stopwords.txt");
+		
+		FileStopwordCollector collector = new FileStopwordCollector(args[0]);
 		ByteArrayOutputStream byteoutput = new ByteArrayOutputStream();
 		ObjectOutputStream objectoutput = new ObjectOutputStream(byteoutput);
 		
@@ -181,9 +127,8 @@ public class AbstractCount {
 		
 		Configuration conf = new Configuration();
 		conf.set("COLLECTOR", serializedCollector);
-		
+
 		Job job = Job.getInstance(conf, "Abstract Count");
-		NLineInputFormat.setNumLinesPerSplit(job, 0);
 		
 		job.setJarByClass(AbstractCount.class);
 		job.setMapperClass(MyCountMapper.class);
@@ -192,17 +137,21 @@ public class AbstractCount {
 
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(IntWritable.class);
-
-		FileInputFormat.addInputPath(job, new Path("input/arxiv.txt"));
-		CollectionSizePath = new Path("out" + System.currentTimeMillis());
-		FileOutputFormat.setOutputPath(job, CollectionSizePath);
+		//arxiv.txr
+		FileInputFormat.addInputPath(job, new Path(args[1]));
+		String outputPath = args[3] + "/part3/" +  "out" + System.currentTimeMillis();
+		Path collectionSizePath = new Path(outputPath);
+		FileOutputFormat.setOutputPath(job, collectionSizePath);	
+		boolean result = false;
 		
-				
-		
-		boolean result = job.waitForCompletion(true);
-		
-		if(result){
-			readLine();
+		try {
+			result = job.waitForCompletion(true);
+		} catch (Exception e) {
+			System.err.println(e.getMessage());
+			e.printStackTrace();
+		}		
+			boolean result2 = false;
+			readCollectionSize(collectionSizePath);
 
 			Configuration conf2 = new Configuration();		
 			Job job2 = Job.getInstance(conf2, "Standardize count");
@@ -215,19 +164,19 @@ public class AbstractCount {
 
 			job2.setOutputKeyClass(Text.class);
 			job2.setOutputValueClass(IntWritable.class);
+			//results
+			FileInputFormat.addInputPath(job2, new Path(args[2]));
 
-			FileInputFormat.addInputPath(job2, new Path("input/results"));
-			FileOutputFormat.setOutputPath(job2, new Path("out" + System.currentTimeMillis()));
-			boolean result2 = job2.waitForCompletion(true);
-
-			System.exit(result2 ? 0 : 1);
-
+			FileOutputFormat.setOutputPath(job2, new Path(args[3] +"/part5/" +"out" + System.currentTimeMillis()));
+			try {
+				result2 = job2.waitForCompletion(true);
+			} catch (Exception e) {
+				System.err.println(e.getMessage());
+				e.printStackTrace();
+			}
 			
-		}
-		
-		
-		
-		
+		System.exit( (result && result2) ? 0 : 1);		
+
 	}
 
 }
