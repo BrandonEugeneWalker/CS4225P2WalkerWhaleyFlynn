@@ -48,8 +48,6 @@ public class AbstractCount {
 		public void map(Object key, Text value, Context context)
 				throws IOException, InterruptedException {
 			Text Collection_Size = new Text("Collection_Size");
-			String serializedCollector = context.getConfiguration().get("COLLECTOR");
-			ObjectInputStream objectinput = new ObjectInputStream(new ByteArrayInputStream(Base64.decodeBase64(serializedCollector)));
 			context.write(Collection_Size, ONE);
 			
 		}
@@ -112,21 +110,12 @@ public class AbstractCount {
 	 */
 	public static void main(String[] args) throws Exception {
 		if (args.length != 3) {
-			System.err.println("Usage: Infometrics <in> <out> <stopword-file>");
+			System.err.println("Usage: Infometrics <in> <out> ");
 			//ToolRunner.printGenericCommandUsage(System.err);
 			//System.exit(2);
 		}
 		
-		FileStopwordCollector collector = new FileStopwordCollector(args[0]);
-		ByteArrayOutputStream byteoutput = new ByteArrayOutputStream();
-		ObjectOutputStream objectoutput = new ObjectOutputStream(byteoutput);
-		
-		objectoutput.writeObject(collector);
-		objectoutput.close();
-		String serializedCollector = new String(Base64.encodeBase64(byteoutput.toByteArray()));
-		
 		Configuration conf = new Configuration();
-		conf.set("COLLECTOR", serializedCollector);
 
 		Job job = Job.getInstance(conf, "Abstract Count");
 		
@@ -138,8 +127,8 @@ public class AbstractCount {
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(IntWritable.class);
 		//arxiv.txr
-		FileInputFormat.addInputPath(job, new Path(args[1]));
-		String outputPath = args[3] + "/part3/" +  "out" + System.currentTimeMillis();
+		FileInputFormat.addInputPath(job, new Path(args[0]));
+		String outputPath = args[1] + "/part3/" +  "out" + System.currentTimeMillis();
 		Path collectionSizePath = new Path(outputPath);
 		FileOutputFormat.setOutputPath(job, collectionSizePath);	
 		boolean result = false;
@@ -150,32 +139,8 @@ public class AbstractCount {
 			System.err.println(e.getMessage());
 			e.printStackTrace();
 		}		
-			boolean result2 = false;
-			readCollectionSize(collectionSizePath);
 
-			Configuration conf2 = new Configuration();		
-			Job job2 = Job.getInstance(conf2, "Standardize count");
-			
-			NLineInputFormat.setNumLinesPerSplit(job2, 0);
-			job2.setJarByClass(AbstractCount.class);
-			job2.setMapperClass(MyStandardizeMapper.class);
-			job2.setCombinerClass(MyStandardizeReducer.class);
-			job2.setReducerClass(MyStandardizeReducer.class);
-
-			job2.setOutputKeyClass(Text.class);
-			job2.setOutputValueClass(IntWritable.class);
-			//results
-			FileInputFormat.addInputPath(job2, new Path(args[2]));
-
-			FileOutputFormat.setOutputPath(job2, new Path(args[3] +"/part5/" +"out" + System.currentTimeMillis()));
-			try {
-				result2 = job2.waitForCompletion(true);
-			} catch (Exception e) {
-				System.err.println(e.getMessage());
-				e.printStackTrace();
-			}
-			
-		System.exit( (result && result2) ? 0 : 1);		
+		System.exit( result  ? 0 : 1);		
 
 	}
 
