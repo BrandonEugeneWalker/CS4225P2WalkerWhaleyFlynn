@@ -2,14 +2,9 @@ package edu.westga.cs4225.project2.processing;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Scanner;
-import java.util.Set;
 
 /**
  * Class created to process similarity in words

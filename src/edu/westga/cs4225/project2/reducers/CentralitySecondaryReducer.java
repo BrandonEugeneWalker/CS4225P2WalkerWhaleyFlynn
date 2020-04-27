@@ -22,16 +22,23 @@ public class CentralitySecondaryReducer extends Reducer<Text, IntWritable, Text,
 	 * Reduces the input by simply adding up the total count for each key value.
 	 * This is basically the reducer from the word count and kmer count.
 	 * 
+	 * @param key used to identify value uniquely
+	 * @param values the value to store
+	 * @param context where to store value
+	 * @throws IOException exception thrown when error occurs
+	 * @throws InterruptedException occurs when interrupted
+	 * 
 	 * @precondition none
 	 * @postcondition the input is reduced
 	 */
+
 	public void reduce(Text key, Iterable<IntWritable> values, Context context)
 			throws IOException, InterruptedException {
 		int sum = 0;
 		for (IntWritable val : values) {
 			sum += val.get();
 		}
-		result.set(sum);
-		context.write(key, result);
+		this.result.set(sum);
+		context.write(key, this.result);
 	}
 }

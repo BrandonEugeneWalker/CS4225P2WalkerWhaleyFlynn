@@ -42,17 +42,22 @@ package edu.westga.cs4225.project2.stemmer;
   * The Stemmer class transforms a word into its root form.  The input
   * word can be provided a character at time (by calling add()), or at once
   * by calling one of the various stem(something) methods.
+  * 
+  * @author Kevin Flynn, Luke Whaley, Brandon Walker
   */
 public class PorterStemmer {  
 	
-	private static final int INC = 50; /* unit of size whereby b is increased */
+	private static final int INC = 50;
 	
 	private char[] b;
-	private int i;     /* offset into b */
-	private int i_end; /* offset to end of stemmed word */
+	private int i;
+	private int i_end;
 	private int j; 
 	private int k;
     
+	/**
+	 * 
+	 */
     public PorterStemmer() { 
     	this.b = new char[PorterStemmer.INC];
     	this.i = 0;
@@ -62,8 +67,10 @@ public class PorterStemmer {
     /**
      * Add a character to the word being stemmed.  When you are finished
      * adding characters, you can call stem(void) to stem the word.
+     * 
+     * @param caracter is the letter you want to add
      */
-    public void add(char ch) {  
+    public void add(char caracter) {  
 	    if (this.i == this.b.length) {  
 		    char[] new_b = new char[this.i + PorterStemmer.INC];
             for (int c = 0; c < this.i; c++) {
@@ -71,23 +78,25 @@ public class PorterStemmer {
             }
             this.b = new_b;
         }
-	    this.b[this.i++] = ch;
+	    this.b[this.i++] = caracter;
     }
 
     /** Adds wLen characters to the word being stemmed contained in a portion
      * of a char[] array. This is like repeated calls of add(char ch), but
      * faster.
+     * @param word is the word you wish to alter
+     * @param wordLength length of the word
      */
-    public void add(char[] w, int wLen) {  
-    	if (this.i + wLen >= this.b.length) {  
-    		char[] new_b = new char[this.i + wLen + PorterStemmer.INC];
+    public void add(char[] word, int wordLength) {  
+    	if (this.i + wordLength >= this.b.length) {  
+    		char[] new_b = new char[this.i + wordLength + PorterStemmer.INC];
             for (int c = 0; c < this.i; c++) {
             	new_b[c] = this.b[c];
             }
             this.b = new_b;
         }
-        for (int c = 0; c < wLen; c++) {
-        	this.b[this.i++] = w[c];
+        for (int c = 0; c < wordLength; c++) {
+        	this.b[this.i++] = word[c];
         }
     }
 
@@ -95,13 +104,17 @@ public class PorterStemmer {
      * After a word has been stemmed, it can be retrieved by toString(),
      * or a reference to the internal buffer can be retrieved by getResultBuffer
      * and getResultLength (which is generally more efficient.)
+     * 
+     * @return word stemmed together
      */
     public String toString() { 
     	return new String(this.b, 0, this.i_end); 
     }
 
     /**
-     * Returns the length of the word resulting from the stemming process.
+     * Gets the length of the word
+     * 
+     * @return Returns the length of the word resulting from the stemming process.
      */
     public int getResultLength() { 
     	return this.i_end; 
@@ -111,12 +124,19 @@ public class PorterStemmer {
      * Returns a reference to a character buffer containing the results of
      * the stemming process.  You also need to consult getResultLength()
      * to determine the length of the result.
+     * @return character buffer
      */
     public char[] getResultBuffer() { 
     	return this.b; 
     }
 
     /* cons(i) is true <=> b[i] is a consonant. */
+    /**
+     * determines the value of cons
+     * 
+     * @param i value you wish to compare
+     * @return true if cons match false if otherwise
+     */
     private final boolean cons(int i) {  
     	switch (this.b[i]) {  
     		case 'a': 
@@ -126,7 +146,7 @@ public class PorterStemmer {
     		case 'u':
     			return false;
     		case 'y': 
-    			return (i==0) ? true : !cons(i-1);
+    			return (i == 0) ? true : !this.cons(i - 1);
     		default: 
     			return true;
     	}
@@ -203,19 +223,19 @@ public class PorterStemmer {
 
    */
 
-   private final boolean cvc(int i)
-   {  if (i < 2 || !cons(i) || cons(i-1) || !cons(i-2)) return false;
+   private final boolean cvc(int i) {
+	  if (i < 2 || !cons(i) || cons(i-1) || !cons(i-2)) return false;
       {  int ch = b[i];
          if (ch == 'w' || ch == 'x' || ch == 'y') return false;
       }
       return true;
    }
 
-   private final boolean ends(String s)
-   {  int l = s.length();
+    private final boolean ends(String string) {
+      int l = string.length();
       int o = k-l+1;
       if (o < 0) return false;
-      for (int i = 0; i < l; i++) if (b[o+i] != s.charAt(i)) return false;
+      for (int i = 0; i < l; i++) if (b[o+i] != string.charAt(i)) return false;
       j = k-l;
       return true;
    }
@@ -288,7 +308,7 @@ public class PorterStemmer {
 
    private final void step3() { if (k == 0) return; /* For Bug 1 */ switch (b[k-1])
    {
-       case 'a': if (ends("ational")) { r("ate"); break; }
+       	case 'a': if (ends("ational")) { r("ate"); break; }
                  if (ends("tional")) { r("tion"); break; }
                  break;
        case 'c': if (ends("enci")) { r("ence"); break; }
