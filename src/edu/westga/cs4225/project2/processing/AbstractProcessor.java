@@ -13,7 +13,7 @@ import edu.westga.cs4225.project2.datatypes.ArrayListWritable;
 import edu.westga.cs4225.project2.stemmer.PorterStemmer;
 
 /**
- * class created to process abstraction
+ * class created to process abstracts and stem the words within them.
  * 
  * @author Luke Whaley, Brandon Walker, Kevin Flynn 
  *
@@ -38,7 +38,7 @@ public class AbstractProcessor {
 	}
 	
 	/**
-	 * gets the title of the abstraction
+	 * gets the title of the abstract
 	 * 
 	 * @return the title of the abstraction title 
 	 */

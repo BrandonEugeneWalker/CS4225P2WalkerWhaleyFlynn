@@ -8,7 +8,8 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.Reducer.Context;
 
 /**
- * This is the reducer class. It counts all of occurrences of the given kmer.
+ * This is the reducer class. Reduces all standardized scores for an abstract into
+ * one final score.
  * 
  * @author Luke Whaley, Brandon Walker, Kevin Flynn 
  *
