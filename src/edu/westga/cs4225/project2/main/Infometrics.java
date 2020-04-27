@@ -90,36 +90,17 @@ public class Infometrics {
 	public static void main(String[] args) throws Exception {
 		if (args.length != 3) {
 			System.err.println("Usage: Infometrics <in> <out> <stopword-file>");
-			ToolRunner.printGenericCommandUsage(System.err);
 			System.exit(2);
 		}
-
-		Configuration conf = new Configuration();
-		FileSystem fs = FileSystem.get(conf);
-		FSDataInputStream stream = fs.open(new Path(args[2]));
 		
-		FileStopwordCollector collector = new FileStopwordCollector(stream.getWrappedStream());
-		ByteArrayOutputStream byteoutput = new ByteArrayOutputStream();
-		ObjectOutputStream objectoutput = new ObjectOutputStream(byteoutput);
+		String partTwoInputLocation = args[0];
+		String initialOutputLocation = args[1] + System.currentTimeMillis();
+		String stopwordInputLocation = args[2];
 		
-		objectoutput.writeObject(collector);
-		objectoutput.close();
-		String serializedCollector = new String(Base64.encodeBase64(byteoutput.toByteArray()));
+		String partTwoOutputLocation = initialOutputLocation + "/part2";
 		
-		conf.set("COLLECTOR", serializedCollector);
-		Job job = Job.getInstance(conf, "Infometrics");
-		job.setJarByClass(Infometrics.class);
-		job.setMapperClass(MyMapper.class);
-		job.setCombinerClass(MyReducer.class);
-		job.setReducerClass(MyReducer.class);
-
-		job.setOutputKeyClass(Text.class);
-		job.setOutputValueClass(ArrayListWritable.class);
-
-		FileInputFormat.addInputPath(job, new Path(args[0]));
-		FileOutputFormat.setOutputPath(job, new Path(args[1] + System.currentTimeMillis()));
+		boolean partTwoResults = PartTwoInfometrics.runPartTwo(partTwoInputLocation, partTwoOutputLocation, stopwordInputLocation);
 		
-		boolean result = job.waitForCompletion(true);
-		System.exit(result ? 0 : 1);
+		
 	}
 }

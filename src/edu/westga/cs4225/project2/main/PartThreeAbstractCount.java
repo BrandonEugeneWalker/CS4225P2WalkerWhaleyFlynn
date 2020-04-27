@@ -32,7 +32,7 @@ public class PartThreeAbstractCount {
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(IntWritable.class);
 		FileInputFormat.addInputPath(job, new Path(input));
-		String outputPath = output + "/part3/out";
+		String outputPath = output;
 		Path collectionSizePath = new Path(outputPath);
 		FileOutputFormat.setOutputPath(job, collectionSizePath);
 

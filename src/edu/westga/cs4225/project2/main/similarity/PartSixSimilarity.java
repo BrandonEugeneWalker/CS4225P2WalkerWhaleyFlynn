@@ -28,7 +28,7 @@ public class PartSixSimilarity {
 	 * @throws ClassNotFoundException
 	 * @throws InterruptedException
 	 */
-	public static void runPartSix(String input, String output) throws IOException, ClassNotFoundException, InterruptedException {
+	public static boolean runPartSix(String input, String output) throws IOException, ClassNotFoundException, InterruptedException {
 		Configuration conf = new Configuration();
 		Job wordstep = Job.getInstance(conf, "Similarity: Word Step");
 		NLineInputFormat.setNumLinesPerSplit(wordstep, 0);
@@ -71,6 +71,9 @@ public class PartSixSimilarity {
 		FileInputFormat.addInputPath(aggregationStep, outputPath2);
 		FileOutputFormat.setOutputPath(aggregationStep, new Path(output + "/aggregationstep"));
 		aggregationStep.waitForCompletion(true);
+		
+		return wordstep.isSuccessful() && groupstep.isSuccessful() && aggregationStep.isSuccessful();
+		
 	}
 	
 }
