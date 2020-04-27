@@ -1,8 +1,8 @@
 package edu.westga.cs4225.project2.processing;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,12 +14,9 @@ public class FileStopwordCollector implements StopwordCollector, Serializable {
 	private static final long serialVersionUID = 6279914493079550937L;
 	private Collection<String> tokens;
 	
-	public FileStopwordCollector(String filepath) throws FileNotFoundException {
+	public FileStopwordCollector(InputStream stream) throws FileNotFoundException {
 		this.tokens = new ArrayList<String>();
-		if (!filepath.startsWith("/")) {
-			filepath = System.getProperty("user.dir") + "/" + filepath;
-		}
-		try (Scanner scan = new Scanner(new File(filepath))) {
+		try (Scanner scan = new Scanner(stream)) {
 			while (scan.hasNextLine()) {
 				String word = scan.nextLine().trim().toLowerCase();
 				this.tokens.add(word);
