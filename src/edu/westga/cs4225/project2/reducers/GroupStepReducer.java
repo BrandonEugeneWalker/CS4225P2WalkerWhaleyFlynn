@@ -10,7 +10,8 @@ import org.apache.hadoop.mapreduce.Reducer.Context;
 import edu.westga.cs4225.project2.datatypes.ArrayListWritable;
 
 /**
- * This is the reducer class.
+ * This is the reducer class. Sums up the number of word relations that a group
+ * contains.
  * 
  * @author Luke Whaley, Brandon Walker, Kevin Flynn 
  *
