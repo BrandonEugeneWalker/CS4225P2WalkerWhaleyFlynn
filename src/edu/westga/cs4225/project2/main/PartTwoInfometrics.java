@@ -25,8 +25,8 @@ import edu.westga.cs4225.project2.processing.FileStopwordCollector;
 import edu.westga.cs4225.project2.reducers.DataCleaningReducer;
 
 /**
- * 
- * @author
+ * Runs the hadoop jobs for part two.
+ * @author Luke Whaley, Brandon Walker, Kevin Flynn 
  *
  */
 public class PartTwoInfometrics {

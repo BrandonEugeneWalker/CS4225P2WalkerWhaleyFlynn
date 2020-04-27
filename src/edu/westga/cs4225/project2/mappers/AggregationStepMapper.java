@@ -12,7 +12,7 @@ import edu.westga.cs4225.project2.datatypes.ArrayListWritable;
 /**
  * This mapper class is used to map and store values for aggregation
  * 
- * @author Luke Whaley
+ * @author Luke Whaley, Brandon Walker, Kevin Flynn 
  *
  */
 public class AggregationStepMapper extends

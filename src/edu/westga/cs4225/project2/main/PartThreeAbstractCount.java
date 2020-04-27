@@ -16,8 +16,8 @@ import edu.westga.cs4225.project2.mappers.AbstractCountMapper;
 import edu.westga.cs4225.project2.reducers.AbstractCountReducer;
 
 /**
- * 
- * @author Kevin Flynn
+ * Runs the hadoop job for part three.
+ * @author Luke Whaley, Brandon Walker, Kevin Flynn 
  *
  */
 public class PartThreeAbstractCount {

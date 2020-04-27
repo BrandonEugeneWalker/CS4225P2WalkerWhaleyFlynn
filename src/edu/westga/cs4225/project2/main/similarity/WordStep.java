@@ -13,7 +13,7 @@ public class WordStep {
 
 	/**
 	 * 
-	 * @author Luke Whaley
+	 * @author Luke Whaley, Brandon Walker, Kevin Flynn 
 	 *
 	 */
 	public static class WordStepMapper extends Mapper<Object, Text, Text, ArrayListWritable<Text>> {

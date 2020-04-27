@@ -13,7 +13,7 @@ public class AggregationStep {
 
 	/**
 	 * 
-	 * @author Luke Whaley
+	 * @author Luke Whaley, Brandon Walker, Kevin Flynn 
 	 *
 	 */
 	public static class AggregationStepMapper extends Mapper<Object, Text, IntWritable, ArrayListWritable<Text>> {

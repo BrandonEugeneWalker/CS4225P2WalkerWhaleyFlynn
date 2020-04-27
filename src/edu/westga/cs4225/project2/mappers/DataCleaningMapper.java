@@ -16,7 +16,7 @@ import edu.westga.cs4225.project2.processing.FileStopwordCollector;
 /**
  * This is the mapper class that maps all of the data.
  * 
- * @author Luke Whaley
+ * @author Luke Whaley, Brandon Walker, Kevin Flynn 
  *
  */
 public class DataCleaningMapper extends Mapper<Object, Text, Text, ArrayListWritable<Text>> {

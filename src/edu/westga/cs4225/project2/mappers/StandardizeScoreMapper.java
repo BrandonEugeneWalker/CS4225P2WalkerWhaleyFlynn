@@ -12,7 +12,7 @@ import org.apache.hadoop.mapreduce.Mapper.Context;
  * This is the mapper class that maps all of the data. The map method counts all
  * of the kmers in the line.
  * 
- * @author Kevin Flynn
+ * @author Luke Whaley, Brandon Walker, Kevin Flynn 
  *
  */
 public class StandardizeScoreMapper extends Mapper<Object, Text, Text, IntWritable> {

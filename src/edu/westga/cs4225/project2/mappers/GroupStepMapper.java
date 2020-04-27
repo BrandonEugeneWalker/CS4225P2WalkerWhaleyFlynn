@@ -13,7 +13,7 @@ import edu.westga.cs4225.project2.processing.SimilarityPreprocessor;
 /**
  * class created to map values for group step
  * 
- * @author Luke Whaley
+ * @author Luke Whaley, Brandon Walker, Kevin Flynn 
  *
  */
 public class GroupStepMapper extends

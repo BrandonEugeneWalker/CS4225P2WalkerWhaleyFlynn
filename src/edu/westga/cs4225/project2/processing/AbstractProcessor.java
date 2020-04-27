@@ -15,7 +15,7 @@ import edu.westga.cs4225.project2.stemmer.PorterStemmer;
 /**
  * class created to process abstraction
  * 
- * @author Luke Whaley
+ * @author Luke Whaley, Brandon Walker, Kevin Flynn 
  *
  */
 public class AbstractProcessor {

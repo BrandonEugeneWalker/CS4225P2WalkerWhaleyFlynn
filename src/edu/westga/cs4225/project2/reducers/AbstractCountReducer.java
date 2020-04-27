@@ -10,7 +10,7 @@ import org.apache.hadoop.mapreduce.Reducer.Context;
 /**
  * This is the reducer class. It counts all of occurrences of the given kmer.
  * 
- * @author Kevin Flynn
+ * @author Luke Whaley, Brandon Walker, Kevin Flynn 
  *
  */
 public class AbstractCountReducer extends Reducer<Text, IntWritable, Text, IntWritable> {

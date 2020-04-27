@@ -14,7 +14,7 @@ public class GroupStep {
 
 	/**
 	 * 
-	 * @author Luke Whaley
+	 * @author Luke Whaley, Brandon Walker, Kevin Flynn 
 	 *
 	 */
 	public static class GroupStepMapper extends Mapper<Object, Text, ArrayListWritable<Text>, IntWritable> {

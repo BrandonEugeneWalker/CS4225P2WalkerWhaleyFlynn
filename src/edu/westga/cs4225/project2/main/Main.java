@@ -5,8 +5,8 @@ import java.io.IOException;
 import edu.westga.cs4225.project2.main.similarity.PartSixSimilarity;
 
 /**
- * 
- * @author Luke Whaley
+ * The entry point into the application
+ * @author Luke Whaley, Brandon Walker, Kevin Flynn 
  *
  */
 public class Main {

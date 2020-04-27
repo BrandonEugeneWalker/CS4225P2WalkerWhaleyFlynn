@@ -11,7 +11,7 @@ import edu.westga.cs4225.project2.datatypes.ArrayListWritable;
 /**
  * This is the reducer class.
  * 
- * @author Luke Whaley
+ * @author Luke Whaley, Brandon Walker, Kevin Flynn 
  *
  */
 public class WordStepReducer extends Reducer<Text, ArrayListWritable<Text>, Text, ArrayListWritable<Text>> {

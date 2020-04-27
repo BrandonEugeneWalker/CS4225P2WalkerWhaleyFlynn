@@ -23,7 +23,7 @@ public class PartFiveStandardizedScore {
 	 * This is the mapper class that maps all of the data.
 	 * The map method counts all of the kmers in the line.
 	 * 
-	 * @author Kevin Flynn
+	 * @author Luke Whaley, Brandon Walker, Kevin Flynn 
 	 *
 	 */
 	public static class MyStandardizeMapper extends

@@ -15,7 +15,7 @@ import edu.westga.cs4225.project2.datatypes.ArrayListWritable;
 
 /**
  * 
- * @author Luke Whaley
+ * @author Luke Whaley, Brandon Walker, Kevin Flynn 
  *
  */
 public class PartSixSimilarity {
