@@ -31,6 +31,16 @@ import edu.westga.cs4225.project2.reducers.DataCleaningReducer;
  */
 public class PartTwoInfometrics {
 
+	/**
+	 * Runs the jobs for part 2 of the project.
+	 * @param input the input directory
+	 * @param output the output directory
+	 * @param stopwordFile the stop-word file location
+	 * @return true if successful
+	 * @throws IOException
+	 * @throws ClassNotFoundException
+	 * @throws InterruptedException
+	 */
 	public static boolean runPartTwo(String input, String output, String stopwordFile)
 			throws IOException, ClassNotFoundException, InterruptedException {
 		Configuration conf = new Configuration();

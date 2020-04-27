@@ -22,6 +22,14 @@ import edu.westga.cs4225.project2.reducers.AbstractCountReducer;
  */
 public class PartThreeAbstractCount {
 
+	/**
+	 * Runs the jobs for part 3 of the project.
+	 * @param input the input directory
+	 * @param output the output directory
+	 * @return true if successful
+	 * @throws IllegalArgumentException
+	 * @throws IOException
+	 */
 	public static boolean runPartThree(String input, String output) throws IllegalArgumentException, IOException {
 		Configuration conf = new Configuration();
 		Job job = Job.getInstance(conf, "Abstract Count");

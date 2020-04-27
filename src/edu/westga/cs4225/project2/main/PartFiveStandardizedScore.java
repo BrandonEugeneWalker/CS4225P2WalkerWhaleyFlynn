@@ -17,61 +17,26 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
+import edu.westga.cs4225.project2.mappers.StandardizeScoreMapper;
+import edu.westga.cs4225.project2.reducers.StandardizeScoreReducer;
+
+/**
+ * This class runs the jobs related to part 5 of the project.
+ * @author Brandon Walker, Kevin flynn, Luke Whaley.
+ *
+ */
 public class PartFiveStandardizedScore {
 	
-	/**
-	 * This is the mapper class that maps all of the data.
-	 * The map method counts all of the kmers in the line.
-	 * 
-	 * @author Luke Whaley, Brandon Walker, Kevin Flynn 
-	 *
-	 */
-	public static class MyStandardizeMapper extends
-			Mapper<Object, Text, Text, IntWritable> {
-		
-		private static IntWritable ONE = new IntWritable();
-
-		@Override
-		public void map(Object key, Text value, Context context)
-				throws IOException, InterruptedException {
-			try {				
-				String[] info = value.toString().split("\t");
-				Configuration conf = context.getConfiguration();
-				int size = conf.getInt("number", -1);
-				
-				double val = (Double.parseDouble(info[1])/ (size - 1) ) * 10000;
-				ONE.set((int) val);
-				Text newKey = new Text(info[0]);
-				context.write(newKey, ONE);	
-				
-			} catch (Exception e) {
-				
-				System.out.print(value);
-			}
-	
-		}
-	}
 
 	/**
-	 * This is the reducer class.
-	 * It counts all of occurrences of the given kmer.
-	 * 
-	 * @author Kevin Flynn
-	 *
+	 * Runs the jobs for part 5.
+	 * @param partThreeOutputDirectory the input taken from part 3
+	 * @param partFourPartTwoOutputDirectory the input taken from part 4
+	 * @param output the output directory
+	 * @return true if successful
+	 * @throws IllegalArgumentException
+	 * @throws IOException
 	 */
-	public static class MyStandardizeReducer extends
-			Reducer<Text, IntWritable, Text, IntWritable> {
-		
-		@Override
-		public void reduce(Text key, Iterable<IntWritable> values,
-				Context context) throws IOException, InterruptedException {
-				for(IntWritable writable : values){
-					context.write(key, writable);	
-				}		
-
-		}
-	}
-	
 	public static boolean runPartFive(String partThreeOutputDirectory, String partFourPartTwoOutputDirectory, String output) throws IllegalArgumentException, IOException {
 		Configuration conf = new Configuration();
 		FileSystem fs = FileSystem.get(conf);
@@ -96,9 +61,9 @@ public class PartFiveStandardizedScore {
 		}
 		Job job2 = Job.getInstance(conf, "Standardize count");
 		job2.setJarByClass(PartFiveStandardizedScore.class);
-		job2.setMapperClass(MyStandardizeMapper.class);
-		job2.setCombinerClass(MyStandardizeReducer.class);
-		job2.setReducerClass(MyStandardizeReducer.class);
+		job2.setMapperClass(StandardizeScoreMapper.class);
+		job2.setCombinerClass(StandardizeScoreReducer.class);
+		job2.setReducerClass(StandardizeScoreReducer.class);
 		job2.setOutputKeyClass(Text.class);
 		job2.setOutputValueClass(IntWritable.class);
 		FileInputFormat.addInputPath(job2, new Path(partFourPartTwoOutputDirectory));
