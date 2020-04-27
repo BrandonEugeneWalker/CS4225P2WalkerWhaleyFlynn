@@ -28,6 +28,14 @@ import edu.westga.cs4225.project2.mappers.CentralitySecondaryMapper;
  */
 public class PartFourDegreeCentralityFinder {
 
+	/**
+	 * Runs part 4 of the project.
+	 * @param input the input directory
+	 * @param output the output directory
+	 * @return true if successul
+	 * @throws IllegalArgumentException
+	 * @throws IOException
+	 */
 	public static boolean runPartFour(String input, String output) throws IllegalArgumentException, IOException {
 		Configuration conf = new Configuration();
 		String outputFileName0 = output + "/part0";

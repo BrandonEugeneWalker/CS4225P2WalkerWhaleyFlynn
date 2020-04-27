@@ -12,8 +12,8 @@ import edu.westga.cs4225.project2.main.similarity.PartSixSimilarity;
 public class Main {
 
 	/**
-	 * 
-	 * @param args
+	 * Runs all the jobs.
+	 * @param args the arguments
 	 * @throws InterruptedException
 	 * @throws IOException
 	 * @throws ClassNotFoundException
