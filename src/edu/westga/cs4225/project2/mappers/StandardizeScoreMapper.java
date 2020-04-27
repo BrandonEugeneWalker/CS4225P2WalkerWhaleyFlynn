@@ -17,7 +17,7 @@ import org.apache.hadoop.mapreduce.Mapper.Context;
  */
 public class StandardizeScoreMapper extends Mapper<Object, Text, Text, IntWritable> {
 
-	private static IntWritable ONE = new IntWritable();
+	private static IntWritable one = new IntWritable();
 
 	@Override
 	public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
@@ -26,9 +26,9 @@ public class StandardizeScoreMapper extends Mapper<Object, Text, Text, IntWritab
 		int size = conf.getInt("number", -1);
 
 		double val = (Double.parseDouble(info[1]) / (size - 1)) * 10000;
-		ONE.set((int) val);
+		one.set((int) val);
 		Text newKey = new Text(info[0]);
-		context.write(newKey, ONE);
+		context.write(newKey, one);
 
 	}
 }

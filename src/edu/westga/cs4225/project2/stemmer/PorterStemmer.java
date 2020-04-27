@@ -43,7 +43,6 @@ package edu.westga.cs4225.project2.stemmer;
   * word can be provided a character at time (by calling add()), or at once
   * by calling one of the various stem(something) methods.
   */
-
 public class PorterStemmer {  
 	
 	private static final int INC = 50; /* unit of size whereby b is increased */

@@ -24,7 +24,7 @@ public class AbstractCountReducer extends Reducer<Text, IntWritable, Text, IntWr
 		for (IntWritable val : values) {
 			sum += val.get();
 		}
-		result.set(sum);
-		context.write(key, result);
+		this.result.set(sum);
+		context.write(key, this.result);
 	}
 }

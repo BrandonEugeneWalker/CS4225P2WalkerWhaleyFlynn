@@ -12,6 +12,12 @@ import org.apache.hadoop.io.Text;
 import edu.westga.cs4225.project2.datatypes.ArrayListWritable;
 import edu.westga.cs4225.project2.stemmer.PorterStemmer;
 
+/**
+ * class created to process abstraction
+ * 
+ * @author Luke Whaley
+ *
+ */
 public class AbstractProcessor {
 
 	private Collection<String> stopwords;
@@ -19,6 +25,11 @@ public class AbstractProcessor {
 	private Set<Text> abstractStopwords;
 	private Text abstractTitle;
 	
+	/**
+	 * initalizes the a instance of AbstractProcessor
+	 * @param collector used to store stopwords
+	 * @throws IOException if a error is found
+	 */
 	public AbstractProcessor(StopwordCollector collector) throws IOException {
 		this.stopwords = new ArrayList<String>(collector.collect());
 		this.stemmer = new PorterStemmer();
@@ -26,14 +37,27 @@ public class AbstractProcessor {
 		this.abstractTitle = null;
 	}
 	
+	/**
+	 * gets the title of the abstraction
+	 * 
+	 * @return the title of the abstraction title 
+	 */
 	public Text getKey() {
 		return this.abstractTitle;
 	}
 	
+	/**
+	 * gets values stored in key
+	 * @return returns a list of writable text for abstractstopwords
+	 */
 	public ArrayListWritable<Text> getValue() {
 		return new ArrayListWritable<Text>(new ArrayList<Text>(this.abstractStopwords));
 	}
 	
+	/**
+	 * takes the input and removes all new lines
+	 * @param input the input you wish to alter
+	 */
 	public void process(String input) {
 		String lowerCaseInput = input.toLowerCase().trim();
 		String withoutNewlineInput = lowerCaseInput.replaceAll("\\\\n", "");

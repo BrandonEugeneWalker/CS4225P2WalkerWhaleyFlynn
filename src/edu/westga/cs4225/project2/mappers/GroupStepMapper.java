@@ -11,6 +11,7 @@ import edu.westga.cs4225.project2.datatypes.ArrayListWritable;
 import edu.westga.cs4225.project2.processing.SimilarityPreprocessor;
 
 /**
+ * class created to map values for group step
  * 
  * @author Luke Whaley
  *

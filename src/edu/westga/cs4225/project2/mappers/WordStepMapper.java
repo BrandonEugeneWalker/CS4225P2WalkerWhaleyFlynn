@@ -10,6 +10,7 @@ import edu.westga.cs4225.project2.datatypes.ArrayListWritable;
 import edu.westga.cs4225.project2.processing.SimilarityPreprocessor;
 
 /**
+ * Class created to map keys and values for word step
  * 
  * @author Luke Whaley
  *

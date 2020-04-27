@@ -18,10 +18,13 @@ import edu.westga.cs4225.project2.processing.SimilarityPreprocessor;
 public class CentralityPrimaryMapper extends Mapper<Object, Text, Text, ArrayListWritable<Text>> {
 
 	/**
-	 * Maps each abstract with the list of its words.
+	 * maps the desired value to a required key
 	 * 
-	 * @precondition none
-	 * @postcondition the input data was mapped
+	 * @param key the key used to identify the value uniquely
+	 * @param value value to store in key 
+	 * @param context the context used to store key and value
+	 * @throws IOException if error occurs
+	 * @throws InterruptedException if mapping gets interrupted
 	 */
 	@Override
 	public void map(Object key, Text value, Context context) throws IOException, InterruptedException {

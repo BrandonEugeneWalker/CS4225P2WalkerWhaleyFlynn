@@ -11,17 +11,17 @@ import org.apache.hadoop.mapreduce.Mapper.Context;
  * This is the mapper class that maps all of the data. The map method counts all
  * of the kmers in the line.
  * 
- * @author Kevin Flynn
+ * @author Luke Whaley, Brandon Walker, Kevin Flynn
  *
  */
 public class AbstractCountMapper extends Mapper<Object, Text, Text, IntWritable> {
 
-	private static IntWritable ONE = new IntWritable(1);
-
+	private static final IntWritable ONE = new IntWritable(1);
+	
 	@Override
 	public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
 		Text Collection_Size = new Text("Collection_Size");
-		context.write(Collection_Size, ONE);
+		context.write(Collection_Size, this.ONE);
 
 	}
 }

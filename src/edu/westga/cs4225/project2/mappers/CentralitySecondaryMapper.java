@@ -16,15 +16,8 @@ import org.apache.hadoop.mapreduce.Mapper.Context;
  */
 public class CentralitySecondaryMapper extends Mapper<Object, Text, Text, IntWritable> {
 
-	private final static IntWritable ONE = new IntWritable(1);
+	private static final IntWritable ONE = new IntWritable(1);
 
-	/**
-	 * Using the results from the first job, it maps each number of another abstract
-	 * attached to the key abstract.
-	 * 
-	 * @precondition none
-	 * @postcondition the input is mapped
-	 */
 	@Override
 	public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
 		String line = value.toString();
